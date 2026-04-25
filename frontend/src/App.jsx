@@ -38,7 +38,7 @@ function stickyNote(node) {
   // console.log(node.data, style)
   // console.log(node, localStorage.getItem("userid"))
   return (
-    <div className='relative group p-2 rounded-md border-2 min-w-48 max-w-96 max-h-[30vh] overflow-y-auto' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+    <div className='relative group p-2 rounded-md border-2 min-w-48 max-w-xl max-h-[50vh] overflow-y-auto' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
       {node.data.owner === localStorage.getItem("userid") && (
         <div className='absolute top-2 right-2 flex flex-row gap-1 z-10 opacity-0 group-hover:opacity-100'>
           <button className='w-4 h-4' onClick={() => node.data.editNode(node)}>
@@ -51,13 +51,18 @@ function stickyNote(node) {
       )
       }
 
-      <h1 className='font-mono font-bold  min-h-4'>{node.data.title}</h1>
-      <hr></hr>
-      <h3 className='font-mono'>{node.data.label}</h3>
+      <div className='flex flex-row justify-left items-end gap-2'>
+        <h1 className='font-mono font-bold text-2xl min-h-4 mask-ellipse'>{node.data.title}</h1>
+        <h1 className='font-mono text-m text-gray-500 min-h-4'>User {node.data.owner}</h1>
 
-      <button className='absolute bottom-2 right-2 w-4 h-4' onClick={() => node.data.commentNode(node.id)}>
-        <img src="/comment.svg" alt="Delete" className='w-4 h-4' />
-      </button>
+      </div>
+      <hr></hr>
+      <p className='font-mono text-sm whitespace-pre-wrap'>{node.data.label}</p>
+      <div className='flex justify-end w-full'>
+        <button className='w-4 h-4' onClick={() => node.data.commentNode(node.id)}>
+          <img src="/comment.svg" alt="Delete" className='w-4 h-4' />
+        </button>
+      </div>
     </div>)
 }
 
@@ -429,19 +434,22 @@ function App() {
     <div className='overflow-y-hidden'>
       <header className='border-2 '>
         <h1 className="text-3xl align-middle text-center">Wall Of Shame</h1>
-        <button className="absolute top-1 right-1 bg-gray-100 w-8 h-8" onClick={() => openProfile()}>
+        <button className="absolute top-1 right-1 bg-blue-300 w-8 h-8 rounded-2xl" onClick={() => openProfile()}>
           <img src="/person.svg" alt="USER" className='w-full h-full' />
         </button>
       </header>
-      <div className='h-screen'>
+      <div className='h-[calc(100vh-48px)]'>
         <ReactFlow nodes={nodesWithFunctions} nodeTypes={nodeTypes} onNodesChange={onNodesChange} snapToGrid={true} snapGrid={[10, 10]} onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop}>
           <Background />
           <Controls />
         </ReactFlow>
       </div>
       <div className='fixed bottom-10 right-10 z-50 w-64 p-4 bg-white/60 h-auto rounded border border-black'>
-        <input className='w-full font-mono font-bold text-3xl' placeholder='Enter Title...' value={title} onChange={(e) => { setTitle(e.target.value) }}></input>
-        <textarea className='w-full font-mono text-xl' placeholder='Enter your note...' value={label} onChange={(e) => { setLabel(e.target.value) }}></textarea>
+        <h2 className='text-xl font-bold mb-2'>Add Note</h2>
+            <hr></hr>
+        <input className='w-full font-mono font-bold text-2xl' placeholder='Enter Title...' value={title} onChange={(e) => { setTitle(e.target.value) }}></input>
+        <hr></hr>
+        <textarea className='w-full font-mono text-m min-h-[20vh]' placeholder='Enter your code...' value={label} onChange={(e) => { setLabel(e.target.value) }}></textarea>
         <div className='flex flex-row gap-2 my-4 w-10/12  items-center justify-center mx-auto'>
           <button className={`w-12 h-12 rounded  bg-red-500 hover:bg-red-700 ${colorID == 1 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setColorId(1) }}></button>
           <button className={`w-12 h-12 rounded  bg-blue-500 hover:bg-blue-700 ${colorID == 2 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setColorId(2) }}></button>
@@ -454,8 +462,9 @@ function App() {
       {editNodeId && (
         <div className='fixed top-15 right-10 z-50 w-64 p-4 bg-white/60 h-auto rounded border border-black'>
           <h2 className='text-xl font-bold mb-2'>Edit Note</h2>
-          <input className='w-full font-mono font-bold text-3xl' placeholder='Enter Title...' value={editTitle} onChange={(e) => { setEditTitle(e.target.value) }}></input>
-          <textarea className='w-full font-mono text-xl' placeholder='Enter your note...' value={editLabel} onChange={(e) => { setEditLabel(e.target.value) }}></textarea>
+          <hr></hr>
+          <input className='w-full font-mono font-bold text-2xl' placeholder='Enter Title...' value={editTitle} onChange={(e) => { setEditTitle(e.target.value) }}></input>
+          <textarea className='w-full font-mono text-m min-h-[10vh]' placeholder='Enter your note...' value={editLabel} onChange={(e) => { setEditLabel(e.target.value) }}></textarea>
           <div className='flex flex-row gap-2 my-4 w-10/12  items-center justify-center mx-auto'>
             <button className={`w-12 h-12 rounded  bg-red-500 hover:bg-red-700 ${editColorId == 1 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setEditColorId(1) }}></button>
             <button className={`w-12 h-12 rounded  bg-blue-500 hover:bg-blue-700 ${editColorId == 2 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setEditColorId(2) }}></button>
@@ -474,16 +483,17 @@ function App() {
               X
             </button>
           </div>
+          <hr></hr>
 
           <div className='flex-1 overflow-y-auto max-h-[60vh] flex flex-col gap-2 my-4 w-full  items-start justify-start mx-auto'>
             {currentComments.length === 0 ? (
-              <p className='text-gray-500 italic'>No comments yet. Be the first to comment!</p>
+              <p className='text-gray-500 italic'>No comments yet!</p>
             ) : (
               currentComments.map((c, index) => (
                 <div className='group width-full flex flex-row justify-between items-start'>
                   <div key={index} className={`p-3 rounded-lg text-sm ${c.commenter === userid ? 'bg-blue-100' : 'bg-white border'}`}>
                     <p className='font-mono text-xs font-bold block '>{c.commenter === userid ? "You" : c.commenter}</p>
-                    <p className='font-mono text-sm wrap-break-words'>{c.comment}</p>
+                    <p className='font-mono text-sm wrap-break-words whitespace-pre-wrap'>{c.comment}</p>
                   </div>
                   <button className={`w-4 h-4 ${c.commenter === userid ? 'block' : 'hidden'} opacity-0 group-hover:opacity-100`} onClick={() => { deleteComment(c.commentid) }}>
                     <img src="/trash.svg" alt="Delete" className='w-4 h-4' />
@@ -507,16 +517,19 @@ function App() {
         </div>
       )}
       {showProfile && (
-        <div className='overflow-hidden absolute top-0 left-0 h-screen w-screen items-center justify-center bg-black/50'>
-          <div className='flex flex-col gap-4 p-4 bg-white rounded border border-black'>
+        <div className='overflow-hidden absolute top-0 left-0 h-screen w-screen flex items-center justify-center bg-black/50 z-100 '>
+          <div className='flex flex-col gap-4 p-4 bg-white rounded border border-black w-6/12 max-h-[75vh]'>
             <h2 className='text-2xl font-bold'>User Profile</h2>
+            <hr></hr>
             <p><span className='font-bold'>UserID:</span> {userid}</p>
-            <p className='font-bold'>Your Codes</p>
-            <div className='border-t border-gray-300'>
+            <p className='font-bold'>Your Notes</p>
+            <hr></hr>
+            <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
               {userNodes.map((node, index) => (
-                <div key={index} className='p-2 border rounded my-1'>
-                  <h3 className='font-bold'>{node.data.title}</h3>
-                  <p>{node.data.label}</p>
+                <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+                  <h3 className='font-bold text-m'>{node.data.title}</h3>
+                  <hr></hr>
+                  <p className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono'>{node.data.label}</p>
                 </div>
               ))}
 

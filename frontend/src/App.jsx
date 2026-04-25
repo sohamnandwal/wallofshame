@@ -405,26 +405,53 @@ function App() {
         },
         body: JSON.stringify({ userid: userid })
       })
-      
+
       if (res.ok) {
         const data = await res.json()
         console.log("User Nodes: ", data)
-        
+
         return data;
       }
-      
+
+    } catch (err) {
+      console.log("Error: ", err)
+      return []
+    }
+  }
+  const fetchUserCommentNodes = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/userComments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userid: userid })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        console.log("User Comments: ", data)
+
+        return data;
+      }
+
     } catch (err) {
       console.log("Error: ", err)
       return []
     }
   }
   const [userNodes, setUserNodes] = useState([])
+  const [userCommentNodes, setUserCommentNodes] = useState([])
   const [showProfile, setShowProfile] = useState(false)
   const openProfile = async () => {
     setShowProfile(true)
-    const nodes= await fetchUserNodes() || []
+    const nodes = await fetchUserNodes() || []
+    const commentNodes = await fetchUserCommentNodes() || []
     setUserNodes(nodes)
+    setUserCommentNodes(commentNodes)
   }
+
+
 
 
   const activeCommentNode = nodes.find(n => n.id === commentNodeId);
@@ -446,7 +473,7 @@ function App() {
       </div>
       <div className='fixed bottom-10 right-10 z-50 w-64 p-4 bg-white/60 h-auto rounded border border-black'>
         <h2 className='text-xl font-bold mb-2'>Add Note</h2>
-            <hr></hr>
+        <hr></hr>
         <input className='w-full font-mono font-bold text-2xl' placeholder='Enter Title...' value={title} onChange={(e) => { setTitle(e.target.value) }}></input>
         <hr></hr>
         <textarea className='w-full font-mono text-m min-h-[20vh]' placeholder='Enter your code...' value={label} onChange={(e) => { setLabel(e.target.value) }}></textarea>
@@ -518,22 +545,53 @@ function App() {
       )}
       {showProfile && (
         <div className='overflow-hidden absolute top-0 left-0 h-screen w-screen flex items-center justify-center bg-black/50 z-100 '>
-          <div className='flex flex-col gap-4 p-4 bg-white rounded border border-black w-6/12 max-h-[75vh]'>
+          <div className='flex flex-col gap-4 p-4 bg-white rounded border border-black w-8/12 max-h-[75vh]'>
             <h2 className='text-2xl font-bold'>User Profile</h2>
             <hr></hr>
             <p><span className='font-bold'>UserID:</span> {userid}</p>
-            <p className='font-bold'>Your Notes</p>
-            <hr></hr>
-            <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
-              {userNodes.map((node, index) => (
-                <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
-                  <h3 className='font-bold text-m'>{node.data.title}</h3>
-                  <hr></hr>
-                  <p className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono'>{node.data.label}</p>
+
+            <div className='flex flex-row gap-5'>
+              <div className='flex-1'>
+                <p className='font-bold'>Your Notes</p>
+                <hr></hr>
+                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
+                  {userNodes.map((node, index) => (
+                    <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+                      <h3 className='font-bold text-m'>{node.data.title}</h3>
+                      <hr></hr>
+                      <p className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono'>{node.data.label}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <div className='flex-1'>
+                <p className='font-bold'>Your Comments</p>
+                <hr></hr>
+                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
+                  {userCommentNodes.map((node, index) => (
+
+                    <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+                      <div className='flex flex-row justify-left items-end gap-2'>
+                        <h1 className='font-mono font-bold text-m min-h-4 mask-ellipse'>{node.data.title}</h1>
+                        <h1 className='font-mono text-sm text-gray-500 min-h-4'>User {node.data.owner}</h1>
+
+                      </div>
+                      <hr></hr>
+                      {node.data.comments.map((c, i) => (
+                        (c.commenter === userid) && (<p key={i} className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono'>{i + 1}. {c.comment}</p>)
+                      ))}
+
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+
 
             </div>
+
+
             <button className='w-full rounded py-2 top-10 bg-blue-500 hover:bg-blue-700 text-white' onClick={() => setShowProfile(false)}>Close</button>
           </div>
         </div>

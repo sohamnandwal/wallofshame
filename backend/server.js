@@ -172,3 +172,12 @@ app.post('/userNodes', async (req, res) => {
     res.status(400).json({ message: err.message })
   }
 })
+
+app.post('/userComments', async (req, res) => {
+  try {
+    const nodes = await Node.find({"data.comments.commenter": req.body.userid})
+    res.status(200).json(nodes)
+  }catch (err) {
+    res.status(400).json({ message: err.message })
+  }
+})

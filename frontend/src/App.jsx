@@ -3,72 +3,13 @@ import './App.css'
 import '@xyflow/react/dist/base.css';
 import { Background, ReactFlow, useNodesState, Controls, useReactFlow } from '@xyflow/react'
 import { useState, useEffect } from 'react';
+import * as components from './components';
 // import pencil from './assets/pencil.svg';
 // import dustbin from './assets/dustbin.svg';
 
 
-const colors = {
-  red: { light: '#fca5a5', dark: '#dc2626' },
-  yellow: { light: '#fef08a', dark: '#eab308' },
-  green: { light: '#bbf7d0', dark: '#22c55e' },
-  blue: { light: '#bfdbfe', dark: '#3b82f6' },
-  black: { light: '#d1d5db', dark: '#000000' }
-}
-const colIDS = {
-  1: 'red',
-  2: 'blue',
-  3: 'green',
-  4: 'yellow'
-}
-const inverseColIDS = {
-  'red': 1,
-  'blue': 2,
-  'green': 3,
-  'yellow': 4
-}
-
-// const editNode = async (node) => {
-
-// }
-
-
-
-
-function stickyNote(node) {
-  // console.log(node.data, style)
-  // console.log(node, localStorage.getItem("userid"))
-  return (
-    <div className='relative group p-2 rounded-md border-2 min-w-48 max-w-xl max-h-[50vh] ' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
-      {node.data.owner === localStorage.getItem("userid") && (
-        <div className='absolute top-2 right-2 flex flex-row gap-1 z-10 opacity-0 group-hover:opacity-100'>
-          <button className='w-4 h-4' onClick={() => node.data.editNode(node)}>
-            <img src="/pencil.svg" alt="Edit" className='w-4 h-4' />
-          </button>
-          <button className='w-4 h-4' onClick={() => node.data.deleteNode(node.id)}>
-            <img src="/trash.svg" alt="Delete" className='w-4 h-4' />
-          </button>
-        </div>
-      )
-      }
-
-      <div className='flex flex-row justify-left items-end gap-2'>
-        <h1 className='font-mono font-bold text-2xl min-h-4 mask-ellipse'>{node.data.title}</h1>
-        <h1 className='font-mono text-m text-gray-500 min-h-4'>User {node.data.owner}</h1>
-
-      </div>
-      <hr></hr>
-      <p className='font-mono text-sm whitespace-pre-wrap overflow-y-auto max-h-[40vh] scrollbar'>{node.data.label}</p>
-      <div className='flex justify-end w-full'>
-        <button className='w-4 h-4' onClick={() => node.data.commentNode(node.id)}>
-          <img src="/comment.svg" alt="Delete" className='w-4 h-4' />
-        </button>
-      </div>
-    </div>)
-}
-
-
 const nodeTypes = {
-  stickyNote: stickyNote
+  stickyNote: components.stickyNote
 }
 const MAXHEIGHT = window.innerHeight * 0.3 + 20 //30vh
 const MAXWIDTH = 384 + 20 //w-48
@@ -83,6 +24,7 @@ function App() {
   const [userid, setUserId] = useState("0")
   // const {addNodes , screenToFlowPosition } =useReactFlow()
 
+  // Initial loadup
   useEffect(() => {
     async function loginUser() {
       let uid = localStorage.getItem("userid")
@@ -103,8 +45,6 @@ function App() {
     loginUser()
   })
 
-
-
   useEffect(() => {
     async function callServer() {
       console.log("Fetch Data")
@@ -116,6 +56,7 @@ function App() {
     callServer()
   }, [setNodes])
 
+  // node delete
   const deleteNode = async (id) => {
     try {
       const res = await fetch(`http://localhost:8000/delnode`, {
@@ -135,6 +76,7 @@ function App() {
     }
   }
 
+  // node edit
   const [editNodeId, setEditNodeId] = useState("")
 
   const [editTitle, setEditTitle] = useState("");
@@ -144,7 +86,7 @@ function App() {
   const editNode = async (node) => {
     setEditTitle(node.data.title)
     setEditLabel(node.data.label)
-    setEditColorId(inverseColIDS[node.data.color])
+    setEditColorId(components.inverseColIDS[node.data.color])
 
     setEditNodeId(node.id)
   }
@@ -160,7 +102,7 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editNodeId,
-          data: { title: editTitle, label: editLabel, color: colIDS[editColorId] }
+          data: { title: editTitle, label: editLabel, color: components.colIDS[editColorId] }
         }),
       });
       if (res.ok) {
@@ -174,8 +116,7 @@ function App() {
     }
   }
 
-
-
+  // comment
   const [commentNodeId, setCommentNodeId] = useState("")
   const [comment, setComment] = useState("")
 
@@ -245,8 +186,7 @@ function App() {
 
 
 
-
-
+  //positioning
   const isOverLapping = (tX, tY) => {
     for (let node of nodes) {
       const overlapX = tX < node.position.x + MAXWIDTH && tX + MAXWIDTH > node.position.x
@@ -271,6 +211,7 @@ function App() {
     return { x: currentX, y: currentY }
   }
 
+  // addNode
   const onAddNode = async () => {
 
     if (title.trim() === "" || label.trim() === "") {
@@ -287,7 +228,7 @@ function App() {
     const newNode = {
       id: id,
       type: 'stickyNote',
-      data: { label: label, color: colIDS[colorID], title: title, owner: userid },
+      data: { label: label, color: components.colIDS[colorID], title: title, owner: userid },
       position: safePos
     }
     console.log(newNode)
@@ -420,11 +361,14 @@ function App() {
 
   return (
     <div className='overflow-y-hidden'>
-      <header className='border-2 '>
-        <h1 className="text-3xl align-middle text-center">Wall Of Shame</h1>
-        <button className="absolute top-1 right-1 bg-blue-300 w-8 h-8 rounded-2xl" onClick={() => openProfile()}>
-          <img src="/person.svg" alt="USER" className='w-full h-full' />
-        </button>
+      <header className='border-2 min-h-64px'>
+        <h1 className="text-4xl align-middle text-center">Wall Of Shame</h1>
+        <div className='absolute top-1 right-1 flex items-center gap-2'>
+          <p className='h-full align-middle font-bold'>User {userid}</p>
+          <button className=" bg-blue-300 w-9 h-9 rounded-2xl hover:bg-blue-100" onClick={() => openProfile()}>
+            <img src="/person.svg" alt="USER" className='w-full h-full' />
+          </button>
+        </div>
       </header>
       <div className='h-[calc(100vh-48px)]'>
         <ReactFlow nodes={nodesWithFunctions} nodeTypes={nodeTypes} onNodesChange={onNodesChange} snapToGrid={true} snapGrid={[10, 10]} onNodesChange={onNodesChange} onNodeDragStop={onNodeDragStop}>
@@ -432,7 +376,7 @@ function App() {
           <Controls />
         </ReactFlow>
       </div>
-      <div className='fixed bottom-10 right-10 z-50 w-64 p-4 bg-white/60 h-auto rounded border border-black'>
+      <div className='fixed bottom-10 right-10 z-50 w-96 p-4 bg-white/60 h-auto rounded border border-black'>
         <h2 className='text-xl font-bold mb-2'>Add Note</h2>
         <hr></hr>
         <input className='w-full font-mono font-bold text-2xl' placeholder='Enter Title...' value={title} onChange={(e) => { setTitle(e.target.value) }}></input>
@@ -444,11 +388,11 @@ function App() {
           <button className={`w-12 h-12 rounded  bg-green-500 hover:bg-redgreen700 ${colorID == 3 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setColorId(3) }}></button>
           <button className={`w-12 h-12 rounded  bg-yellow-500 hover:bg-red-yellow ${colorID == 4 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setColorId(4) }}></button>
         </div>
-        <button className='w-full rounded py-2 top-10 bg-blue-500 hover:bg-blue-700' onClick={onAddNode}>hELLO</button>
+        <button className='w-full rounded py-2 top-10 bg-blue-500 hover:bg-blue-700 text-white' onClick={onAddNode}>Add</button>
       </div>
 
       {editNodeId && (
-        <div className='fixed top-15 right-10 z-50 w-64 p-4 bg-white/60 h-auto rounded border border-black'>
+        <div className='fixed top-15 right-10 z-50 w-96 p-4 bg-white/60 h-auto rounded border border-black'>
           <h2 className='text-xl font-bold mb-2'>Edit Note</h2>
           <hr></hr>
           <input className='w-full font-mono font-bold text-2xl' placeholder='Enter Title...' value={editTitle} onChange={(e) => { setEditTitle(e.target.value) }}></input>
@@ -459,12 +403,12 @@ function App() {
             <button className={`w-12 h-12 rounded  bg-green-500 hover:bg-redgreen700 ${editColorId == 3 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setEditColorId(3) }}></button>
             <button className={`w-12 h-12 rounded  bg-yellow-500 hover:bg-red-yellow ${editColorId == 4 ? 'ring-4 ring-black ring-offset-2' : 'ring-0'}`} onClick={() => { setEditColorId(4) }}></button>
           </div>
-          <button className='w-full rounded py-2 top-10 bg-blue-500 hover:bg-blue-700' onClick={saveEditNode}>Save</button>
+          <button className='w-full rounded py-2 top-10 bg-blue-500 hover:bg-blue-700 text-white' onClick={saveEditNode}>Save</button>
         </div>
 
       )}
       {commentNodeId && (
-        <div className='flex flex-col fixed bottom-10 left-10 z-50 min-w-64 max-w-96 p-4 bg-white/60 h-auto rounded border border-black'>
+        <div className='flex flex-col fixed bottom-10 left-10 z-50 min-w-96 max-w-96 p-4 bg-white/60 h-auto rounded border border-black'>
           <div className="flex justify-between items-center">
             <h2 className="font-bold text-lg font-mono">Comments | {activeCommentNode.data.title}</h2>
             <button className="text-gray-500 hover:text-black font-bold p-1" onClick={() => setCommentNodeId(null)}>
@@ -483,7 +427,7 @@ function App() {
                     <p className='font-mono text-xs font-bold block '>{c.commenter === userid ? "You" : c.commenter}</p>
                     <p className='font-mono text-sm wrap-break-words whitespace-pre-wrap'>{c.comment}</p>
                   </div>
-                  <button className={`w-4 h-4 ${c.commenter === userid ? 'block' : 'hidden'} opacity-0 group-hover:opacity-100`} onClick={() => { deleteComment(c.commentid) }}>
+                  <button className={`w-4 h-4 ${c.commenter === userid ? 'block' : 'hidden'} opacity-0 group-hover:opacity-100 hover:opacity-20`} onClick={() => { deleteComment(c.commentid) }}>
                     <img src="/trash.svg" alt="Delete" className='w-4 h-4' />
                   </button>
                 </div>
@@ -515,12 +459,12 @@ function App() {
               <div className='flex-1'>
                 <p className='font-bold'>Your Notes</p>
                 <hr></hr>
-                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
+                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto scrollbar'>
                   {userNodes.map((node, index) => (
-                    <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+                    <div key={index} className='p-2 border rounded my-2 mx-10 hover:opacity-85' style={{ backgroundColor: components.colors[node.data.color].light, borderColor: components.colors[node.data.color].dark }} onClick={()=>{setCenter(node.position.x+100, node.position.y+100, { zoom: getZoom(), duration: 500 }); editNode(node); setShowProfile(false)}}>
                       <h3 className='font-bold text-m'>{node.data.title}</h3>
                       <hr></hr>
-                      <p className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono'>{node.data.label}</p>
+                      <p className='whitespace-pre-wrap max-h-[10vh] overflow-auto text-sm font-mono scrollbar m-2 p-2 bg-white/30 rounded-md'>{node.data.label}</p>
                     </div>
                   ))}
                 </div>
@@ -529,10 +473,10 @@ function App() {
               <div className='flex-1'>
                 <p className='font-bold'>Your Comments</p>
                 <hr></hr>
-                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto'>
+                <div className='border-t border-gray-300 max-h-[40vh] overflow-y-auto scrollbar'>
                   {userCommentNodes.map((node, index) => (
 
-                    <div key={index} className='p-2 border rounded my-1' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+                    <div key={index} className='p-2 border rounded my-2 mx-10 hover:opacity-85' style={{ backgroundColor: components.colors[node.data.color].light, borderColor: components.colors[node.data.color].dark }}  onClick={()=>{setCenter(node.position.x+100, node.position.y+100, { zoom: getZoom(), duration: 500 }); setCommentNodeId(node.id); setShowProfile(false)}}>
                       <div className='flex flex-row justify-left items-end gap-2'>
                         <h1 className='font-mono font-bold text-m min-h-4 mask-ellipse'>{node.data.title}</h1>
                         <h1 className='font-mono text-sm text-gray-500 min-h-4'>User {node.data.owner}</h1>

@@ -38,7 +38,7 @@ function stickyNote(node) {
   // console.log(node.data, style)
   // console.log(node, localStorage.getItem("userid"))
   return (
-    <div className='relative group p-2 rounded-md border-2 min-w-48 max-w-xl max-h-[50vh] overflow-y-auto' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
+    <div className='relative group p-2 rounded-md border-2 min-w-48 max-w-xl max-h-[50vh] ' style={{ backgroundColor: colors[node.data.color].light, borderColor: colors[node.data.color].dark }}>
       {node.data.owner === localStorage.getItem("userid") && (
         <div className='absolute top-2 right-2 flex flex-row gap-1 z-10 opacity-0 group-hover:opacity-100'>
           <button className='w-4 h-4' onClick={() => node.data.editNode(node)}>
@@ -57,7 +57,7 @@ function stickyNote(node) {
 
       </div>
       <hr></hr>
-      <p className='font-mono text-sm whitespace-pre-wrap'>{node.data.label}</p>
+      <p className='font-mono text-sm whitespace-pre-wrap overflow-y-auto max-h-[40vh] scrollbar'>{node.data.label}</p>
       <div className='flex justify-end w-full'>
         <button className='w-4 h-4' onClick={() => node.data.commentNode(node.id)}>
           <img src="/comment.svg" alt="Delete" className='w-4 h-4' />
@@ -66,45 +66,6 @@ function stickyNote(node) {
     </div>)
 }
 
-
-
-// const preData = [
-//   {
-//     id: '1',
-//     type: 'stickyNote',
-//     owner: 'me',
-//     data: { label: 'red', color: 'red', title: "RED" },
-//     position: { x: 0, y: 50 }
-//   },
-//   {
-//     id: '2',
-//     type: 'stickyNote',
-//     owner: 'me',
-//     data: { label: 'yellow', color: 'yellow', title: "YELLOW" },
-//     position: { x: 100, y: 50 }
-//   },
-//   {
-//     id: '3',
-//     type: 'stickyNote',
-//     owner: 'me',
-//     data: { label: 'green', color: 'green', title: "GREEN" },
-//     position: { x: 300, y: 50 }
-//   },
-//   {
-//     id: '4',
-//     type: 'stickyNote',
-//     owner: 'me',
-//     data: { label: 'blue', color: 'blue', title: "BLUE" },
-//     position: { x: 200, y: 50 }
-//   }
-// ]
-
-// async function getIds(){
-//   const res = await fetch("http://localhost:8000/ids")
-//   const body = await res.json()
-//   var id = parseInt(body.id)
-//   return id
-// }
 
 const nodeTypes = {
   stickyNote: stickyNote
